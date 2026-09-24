@@ -47,7 +47,7 @@ imutils==0.5.4
 itsdangerous==2.2.0
 Jinja2==3.1.6
 jiter==0.10.0
-joblib==1.1.0
+joblib>=1.3.0
 jsonpatch==1.33
 jsonpointer==3.0.0
 jsonschema==4.25.0
@@ -107,7 +107,7 @@ requests-toolbelt==1.0.0
 rich==14.1.0
 rpds-py==0.27.0
 safetensors==0.6.2
-scikit-learn==1.0.2
+scikit-learn==1.5.2
 scipy==1.13.1
 seaborn==0.13.2
 sentence-transformers==5.1.0
@@ -148,5 +148,4 @@ wrapt==1.17.3
 yarl==1.20.1
 zipp==3.23.0
 zstandard==0.24.0
-scikit-learn==1.0.2
 
