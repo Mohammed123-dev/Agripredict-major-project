@@ -1,0 +1,26 @@
+.chat-container {
+    font-family: Arial, sans-serif;
+}
+
+.message-container {
+    display: flex;
+    margin: 5px 0;
+}
+
+.user-message {
+    background: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 15px;
+    margin-left: auto;
+    max-width: 70%;
+}
+
+.bot-message {
+    background: #e5e5e5;
+    color: black;
+    padding: 8px 12px;
+    border-radius: 15px;
+    margin-right: auto;
+    max-width: 70%;
+}

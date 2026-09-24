@@ -1,0 +1,108 @@
+{% extends 'layout.html' %}
+{% block body %}
+<style>
+  body {
+    background: #f4f9f4;
+  }
+  .result-container {
+    margin-top: 8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .card-custom {
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+    background: #ffffff;
+    text-align: center;
+  }
+  .prediction-text {
+    font-size: 28px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  .voice-btn, .stop-btn, .lang-select {
+    margin-top: 20px;
+    padding: 12px 25px;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .voice-btn {
+    background: #28a745;
+    color: white;
+  }
+  .voice-btn:hover {
+    background: #218838;
+  }
+  .stop-btn {
+    background: #dc3545;
+    color: white;
+    margin-left: 10px;
+  }
+  .stop-btn:hover {
+    background: #c82333;
+  }
+  .lang-select {
+    background: #007bff;
+    color: white;
+  }
+  .lang-select:hover {
+    background: #0069d9;
+  }
+</style>
+
+<div class="container result-container">
+  <div class="card card-custom">
+    <h1 class="prediction-text">
+      🌱 You should grow <i>{{ prediction }}</i> in your farm
+    </h1>
+
+    <!-- Language Dropdown -->
+    <select id="language" class="lang-select">
+      <option value="en-IN">English</option>
+      <option value="te-IN">Telugu</option>
+      <option value="hi-IN">Hindi</option>
+      <option value="ta-IN">Tamil</option>
+      <option value="kn-IN">Kannada</option>
+      <option value="ml-IN">Malayalam</option>
+      <option value="gu-IN">Gujarati</option>
+      <option value="mr-IN">Marathi</option>
+      <option value="bn-IN">Bengali</option>
+      <option value="pa-IN">Punjabi</option>
+    </select>
+
+    <!-- Voice Reading Buttons -->
+    <div>
+      <button class="voice-btn" onclick="speakResult()">🔊 Read Out</button>
+      <button class="stop-btn" onclick="stopVoice()">🔇 Stop</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function speakResult() {
+    let text = "You should grow {{ prediction }} in your farm";
+
+    // Selected language
+    let lang = document.getElementById("language").value;
+
+    // Setup speech
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = lang;   // Dynamic language
+    speech.rate = 1;
+    speech.pitch = 1;
+
+    window.speechSynthesis.cancel(); // stop previous voice
+    window.speechSynthesis.speak(speech);
+  }
+
+  function stopVoice() {
+    window.speechSynthesis.cancel();
+  }
+</script>
+{% endblock %}

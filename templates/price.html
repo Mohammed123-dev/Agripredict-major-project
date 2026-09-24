@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crop Price Prediction</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+  <style>
+    body {
+      background: #eef5f0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .container {
+      margin-top: 60px;
+      max-width: 650px;
+    }
+    .card {
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #198754;
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+    #result {
+      font-weight: bold;
+      font-size: 1.1rem;
+      text-align: center;
+      margin-top: 20px;
+      display: none;
+    }
+    #chartContainer {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>📊 Crop Price Prediction</h2>
+      <form id="priceForm">
+        <div class="mb-3">
+          <label for="crop" class="form-label">Crop Name</label>
+          <input type="text" id="crop" name="crop" class="form-control" placeholder="e.g.,any crop" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="year" class="form-label">Year</label>
+          <select id="year" name="year" class="form-control" required></select>
+        </div>
+
+        <div class="mb-3">
+          <label for="month" class="form-label">Month</label>
+          <input type="number" id="month" name="month" class="form-control" placeholder="1-12" min="1" max="12" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="rainfall" class="form-label">Rainfall (mm)</label>
+          <input type="number" id="rainfall" name="rainfall" min="0" max="2000" step="0.1" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="demand" class="form-label">Market Demand Indicator (0–100)</label>
+          <input type="number" id="demand" name="demand" class="form-control" min="0" max="100" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="supply" class="form-label">Market Supply Indicator (0–100)</label>
+          <input type="number" id="supply" name="supply" class="form-control" min="0" max="100" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="quantity" class="form-label">Quantity</label>
+          <input type="number" id="quantity" name="quantity" class="form-control" min="1" value="1" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="unit" class="form-label">Unit</label>
+          <select id="unit" name="unit" class="form-control" required>
+            <option value="kg">Kilograms (kg)</option>
+            <option value="quintal">Quintals (q)</option>
+            <option value="ton">Tons (t)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">🔮 Predict Price</button>
+      </form>
+
+      <div id="result" class="alert mt-3"></div>
+      <div id="chartContainer">
+        <canvas id="priceChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Populate year dropdown
+    let currentYear = new Date().getFullYear();
+    for (let y = 1997; y <= currentYear + 50; y++) {
+      $("#year").append(new Option(y, y));
+    }
+
+    let priceChart;
+
+    function showChart(crop, predictedPrice) {
+      let ctx = document.getElementById("priceChart").getContext("2d");
+      if (priceChart) priceChart.destroy();
+      priceChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: [crop],
+          datasets: [{
+            label: "Predicted Price (₹/kg)",
+            data: [predictedPrice],
+            backgroundColor: "rgba(25, 135, 84, 0.7)",
+            borderColor: "rgba(25, 135, 84, 1)",
+            borderWidth: 1
+          }]
+        },
+        options: { responsive: true }
+      });
+    }
+
+    $("#priceForm").submit(function(e) {
+      e.preventDefault();
+      let year = parseInt($("#year").val());
+
+      let data = {
+        crop: $("#crop").val().trim(),
+        year: year,
+        month: parseInt($("#month").val()),
+        rainfall: parseFloat($("#rainfall").val()),
+        demand: parseFloat($("#demand").val()),
+        supply: parseFloat($("#supply").val()),
+        quantity: parseFloat($("#quantity").val()),
+        unit: $("#unit").val()   // 👈 sending unit
+      };
+
+      $("#result").removeClass("alert-success alert-danger")
+                  .addClass("alert-info")
+                  .html("⏳ Predicting price, please wait...")
+                  .fadeIn();
+
+      $.ajax({
+        url: "/predict_price",
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(data),
+        success: function(res) {
+          if (res.predicted_price_per_kg !== undefined) {
+            $("#result").removeClass("alert-info alert-danger")
+                        .addClass("alert-success")
+                        .html(
+                          "🌾 <b>Crop:</b> " + res.crop + "<br>" +
+                          "✅ <b>Predicted Price:</b> ₹" + res.predicted_price_per_kg + " /kg<br>" +
+                          "📦 <b>Quantity:</b> " + res.quantity + " " + res.unit + "<br>" +
+                          "💰 <b>Total Amount:</b> ₹" + res.total_amount
+                        ).fadeIn();
+            showChart(res.crop, res.predicted_price_per_kg);
+          } else {
+            $("#result").removeClass("alert-info alert-success")
+                        .addClass("alert-danger")
+                        .text("⚠️ Error: " + (res.error || "Unknown error")).fadeIn();
+          }
+        },
+        error: function(xhr) {
+          $("#result").removeClass("alert-info alert-success")
+                      .addClass("alert-danger")
+                      .text("⚠️ Server Error: " + xhr.statusText).fadeIn();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

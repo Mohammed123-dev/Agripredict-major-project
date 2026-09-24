@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Current File (Integrated Terminal)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",                  // Runs the currently active Python file
+            "console": "integratedTerminal",       // Use VS Code's terminal for input/output
+            "justMyCode": true,                    // Ignores library code when debugging
+            "cwd": "${workspaceFolder}",           // Set working directory to your project folder
+            "env": {                               // Optional: add environment variables
+                "PYTHONUNBUFFERED": "1"
+            },
+            "envFile": "${workspaceFolder}/.env", // Optional: read environment variables from .env
+            "stopOnEntry": false,                  // Don't stop at first line automatically
+            "logToFile": false                     // Enable if you want debug logs saved
+        },
+        {
+            "name": "Python: Current File (External Terminal)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "externalTerminal",         // Opens a separate terminal window
+            "justMyCode": true,
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

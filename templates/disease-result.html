@@ -1,0 +1,154 @@
+{% extends 'layout.html' %} 
+{% block body %}
+<style>
+  body {
+    background: #f8f9fa;
+  }
+  .result-container {
+    margin: 9rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  .card-custom {
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.2);
+    background-color: blanchedalmond;
+    text-align: center;
+    margin-bottom: 20px;
+    max-width: 800px;
+  }
+  .disease-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2c3e50;
+  }
+  .disease-desc {
+    margin-top: 15px;
+    font-size: 18px;
+    color: #000;
+  }
+  .voice-btn, .stop-btn {
+    margin-top: 15px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .voice-btn {
+    background: #007bff;
+  }
+  .voice-btn:hover {
+    background: #0056b3;
+  }
+  .stop-btn {
+    background: #dc3545;
+    margin-left: 10px;
+  }
+  .stop-btn:hover {
+    background: #c82333;
+  }
+  .download-btn {
+    margin-top: 20px;
+    border: 2px solid black;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19);
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: #28a745;
+    color: white;
+    cursor: pointer;
+  }
+  .download-btn:hover {
+    background: #218838;
+  }
+  .lang-select {
+    margin-top: 12px;
+    padding: 8px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+</style>
+
+<div class="container result-container">
+  <div class="card card-custom">
+    {% if prediction %}
+      <h2 class="disease-title">🌿 Predicted Disease: {{ prediction }}</h2>
+      <p class="disease-desc" id="descText">{{ description|safe }}</p>
+
+      <!-- Language Selector -->
+      <select id="language" class="lang-select">
+        <option value="en-IN">English</option>
+        <option value="te-IN">తెలుగు (Telugu)</option>
+        <option value="hi-IN">हिन्दी (Hindi)</option>
+        <option value="ta-IN">தமிழ் (Tamil)</option>
+        <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+        <option value="ml-IN">മലയാളം (Malayalam)</option>
+      </select>
+
+      <!-- Voice Reading Buttons -->
+      <div>
+        <button class="voice-btn" onclick="speakResult()">🔊 Read Out</button>
+        <button class="stop-btn" onclick="stopVoice()">🔇 Stop</button>
+      </div>
+    {% else %}
+      <p class="text-center" style="color: gray; font-size: 18px;">
+        Upload an image to get disease prediction
+      </p>
+    {% endif %}
+  </div>
+
+  {% if prediction %}
+  <!-- Download Report -->
+  <form method="POST" action="{{ url_for('download2') }}">
+    <input type="hidden" name="fileData" value="{{ prediction }}" />
+    <button class="download-btn" type="submit">
+      <img src="{{ url_for('static', filename='images/Downloading.png') }}" 
+           style="width: 25px; height: 25px; margin-right: 8px;">
+      Download Report
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+<script>
+  let voices = [];
+
+  function loadVoices() {
+    voices = window.speechSynthesis.getVoices();
+  }
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+  loadVoices();
+
+  function speakResult() {
+    let prediction = "{{ prediction }}";
+    let description = document.getElementById("descText")?.innerText || "";
+    let text = "Predicted Disease: " + prediction + ". " + description;
+
+    let lang = document.getElementById("language").value;
+
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = lang;
+    speech.rate = 1;
+    speech.pitch = 1;
+
+    let selectedVoice = voices.find(v => v.lang === lang);
+    if (selectedVoice) {
+      speech.voice = selectedVoice;
+    }
+
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(speech);
+  }
+
+  function stopVoice() {
+    window.speechSynthesis.cancel();
+  }
+</script>
+{% endblock %}
