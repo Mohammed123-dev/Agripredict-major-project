@@ -1,5 +1,6 @@
 # Importing essential libraries and modules
-
+import os
+import mysql.connector
 from flask import Flask, render_template, request, Markup, make_response
 from utils.model import ResNet9, predict_image
 from utils.model import predict_image
@@ -63,20 +64,22 @@ from utils.model import predict_image
 from utils.disease import disease_dic
 
 # ----------------- DB Connection -----------------
-import mysql.connector
+# ----------------- Database Connection (Safe for Render) -----------------
+mydb = None
+cursor = None
 
-
-# ✅ Connect to MySQL
-mydb = mysql.connector.connect(
-    host="localhost",
-    user="maibu",
-    password="22j21a05d5",
-    database="chand",
-    auth_plugin='mysql_native_password'
-)
-
-print("✅ Connected to MySQL:", mydb.is_connected())
-cursor = mydb.cursor()
+try:
+    mydb = mysql.connector.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "maibu"),
+        password=os.getenv("DB_PASSWORD", "22j21a05d5"),
+        database=os.getenv("DB_NAME", "chand"),
+        auth_plugin="mysql_native_password"
+    )
+    print("✅ Connected to MySQL:", mydb.is_connected())
+    cursor = mydb.cursor()
+except Exception as e:
+    print("⚠️ MySQL connection failed (app will still start):", e)
 
 
 # ===================================================================================================================================
